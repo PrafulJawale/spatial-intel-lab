@@ -62,10 +62,15 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange }: G
           const first = points[0];
           const second = points[1];
           if (!first || !second) return;
-          changeRef.current({ type: "Polygon", coordinates: [[[first[0], first[1]], [second[0], first[1]], [second[0], second[1]], [first[0], second[1]], [first[0], first[1]]]] });
+          const [firstLng, firstLat] = first;
+          const [secondLng, secondLat] = second;
+          if (firstLng === undefined || firstLat === undefined || secondLng === undefined || secondLat === undefined) return;
+          changeRef.current({ type: "Polygon", coordinates: [[[firstLng, firstLat], [secondLng, firstLat], [secondLng, secondLat], [firstLng, secondLat], [firstLng, firstLat]]] });
           pointsRef.current = [];
         } else if (mode === "polygon" && points.length >= 3) {
-          changeRef.current({ type: "Polygon", coordinates: [[...points, points[0]]] });
+          const first = points[0];
+          if (!first) return;
+          changeRef.current({ type: "Polygon", coordinates: [[...points, first]] });
         }
       });
       mapRef.current = map;
