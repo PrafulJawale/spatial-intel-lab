@@ -78,7 +78,7 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange }: G
     if (!map?.isStyleLoaded()) return;
     const update = (sourceId: string, geometry: GeoJsonGeometry | null) => {
       const source = map.getSource(sourceId);
-      if (!source || source.type !== "geojson") return;
+      if (!source || source.type !== "geojson" || !("setData" in source)) return;
       source.setData({ type: "FeatureCollection", features: geometry ? [{ type: "Feature", properties: {}, geometry }] : [] });
     };
     update("draft-roi", draftROI);
