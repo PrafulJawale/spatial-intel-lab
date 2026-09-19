@@ -78,8 +78,9 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange }: G
     if (!map?.isStyleLoaded()) return;
     const update = (sourceId: string, geometry: GeoJsonGeometry | null) => {
       const source = map.getSource(sourceId);
-      if (!source || source.type !== "geojson" || !("setData" in source)) return;
-      source.setData({ type: "FeatureCollection", features: geometry ? [{ type: "Feature", properties: {}, geometry }] : [] });
+      if (!source || source.type !== "geojson") return;
+      const geoJsonSource = map.getSource<import("maplibre-gl").GeoJSONSource>(sourceId);
+      geoJsonSource?.setData({ type: "FeatureCollection", features: geometry ? [{ type: "Feature", properties: {}, geometry }] : [] });
     };
     update("draft-roi", draftROI);
     update("validated-roi", validatedROI);
