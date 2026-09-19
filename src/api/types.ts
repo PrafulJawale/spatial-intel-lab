@@ -35,7 +35,7 @@ export interface ToolResult {
 
 export interface GeoJsonGeometry {
   type: "Polygon";
-  coordinates: unknown;
+  coordinates: number[][][];
 }
 
 export interface WorkspaceRef {
