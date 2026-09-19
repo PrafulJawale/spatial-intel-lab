@@ -92,5 +92,5 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange }: G
     update("validated-roi", validatedROI);
   }, [draftROI, validatedROI]);
 
-  return <div ref={containerRef} className="absolute inset-0" aria-label="Interactive geospatial map" />;
+  return <div className="absolute inset-0"><div ref={containerRef} className="h-full w-full" aria-label="Interactive geospatial map" /></div>;
 }
