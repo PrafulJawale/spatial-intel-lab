@@ -34,7 +34,7 @@ export interface ToolResult {
 }
 
 export interface GeoJsonGeometry {
-  type: string;
+  type: "Polygon";
   coordinates: unknown;
 }
 
