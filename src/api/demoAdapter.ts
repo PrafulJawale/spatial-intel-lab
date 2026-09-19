@@ -67,9 +67,9 @@ export const demoAdapter: SatQueryAdapter = {
     const session: SessionSummary = {
       id: input.id ?? `demo-${Date.now()}`,
       title: input.title ?? "Untitled demonstration",
-      description: input.description,
       tags: input.tags ?? ["DEMO"],
       archived: false,
+      ...(input.description ? { description: input.description } : {}),
     };
     sessions = [session, ...sessions.filter((item) => item.id !== session.id)];
     return session;
