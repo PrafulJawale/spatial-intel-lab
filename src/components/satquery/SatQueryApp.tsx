@@ -36,7 +36,7 @@ export function SatQueryApp() {
     raster: rasterQuery.data ?? emptyRaster,
     activeSessionId,
     onNew: () => { setActiveSessionId(null); setMessages([{ id: `new-${Date.now()}`, role: "assistant", text: "New session ready. Raster and ROI context have not been established." }]); setDraftROI(null); setValidatedROI(null); },
-    onSave: () => sessionMutation.mutate(() => satQueryAdapter.saveSession({ id: activeSessionId ?? undefined, title: "Untitled demonstration", tags: satQueryAdapter.status.mode === "demo" ? ["DEMO"] : [] })),
+    onSave: () => sessionMutation.mutate(() => satQueryAdapter.saveSession({ ...(activeSessionId ? { id: activeSessionId } : {}), title: "Untitled demonstration", tags: satQueryAdapter.status.mode === "demo" ? ["DEMO"] : [] })),
     onLoad: (id: string) => { setActiveSessionId(id); sessionMutation.mutate(() => satQueryAdapter.loadSession(id)); },
     onArchive: (id: string, archived: boolean) => sessionMutation.mutate(() => archived ? satQueryAdapter.restoreSession(id) : satQueryAdapter.archiveSession(id)),
     onDelete: (id: string) => sessionMutation.mutate(() => satQueryAdapter.deleteSession(id)),
