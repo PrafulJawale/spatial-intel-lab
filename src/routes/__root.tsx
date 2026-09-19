@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" },
-      { rel: "stylesheet", href: "https://unpkg.com/maplibre-gl@6.10.0/dist/maplibre-gl.css" },
+      { rel: "stylesheet", href: "https://unpkg.com/maplibre-gl@5.16.0/dist/maplibre-gl.css" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),

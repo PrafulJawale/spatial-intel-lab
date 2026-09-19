@@ -24,7 +24,7 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange }: G
       if (!containerRef.current || mapRef.current) return;
       const maplibregl = await import("maplibre-gl");
       if (!active || !containerRef.current) return;
-      maplibregl.setWorkerUrl("/maplibre-gl-worker.mjs");
+      maplibregl.setWorkerUrl("/maplibre-gl-csp-worker.js");
       const map = new maplibregl.Map({
         container: containerRef.current,
         center: [78.9, 20.7],
