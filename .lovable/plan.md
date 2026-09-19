@@ -16,20 +16,27 @@ Build a production-quality, map-first React interface that presents Python backe
 - **Feedback:** contextual loading, empty, error, permission, unsupported, clarification, and insufficient-data states shown where they matter rather than only as notifications.
 
 ## Data and architecture
-- Define strict TypeScript contracts matching only the documented `ToolResult` envelope and API operations; keep optional and nullable fields safe.
-- Add an adapter boundary with `real` and `demo` implementations. The real adapter calls the documented Python endpoints; the demo adapter is visibly identified and returns fixture-shaped presentation data without claiming real analysis.
+- Keep this repository frontend-only. Do not create or modify Python services, persistence, scientific processing, evidence generation, or Nemotron logic.
+- Create exactly one data-access boundary under `src/api`: centralized flexible types, `SatQueryAdapter`, `demoAdapter`, and `realAdapter`. UI code never calls `fetch` directly.
+- Match only the documented operations and exact flexible `ToolResult` envelope. Unsupported or undocumented capabilities remain explicit interface TODOs rather than browser implementations.
+- Never silently fall back from the real adapter to demo data. Show a persistent system indicator for `Backend: Connected`, `Backend: Disconnected`, or `Demo Mode — Backend not connected`.
+- Keep demo content isolated in `demoAdapter.ts`, unmistakably labeled, and free of fabricated measurements, dates, sensors, imagery, evidence, provenance, or scientific conclusions.
 - Use TanStack Query for raster context, tools, sessions, evidence, validated ROI, and query mutations. Keep viewport, draft ROI, panel visibility, opacity, and layer visibility local.
 - Lazy-load the browser-only map implementation to preserve server rendering safety.
 - Break the interface into focused workspace, map, intelligence, status, evidence, provenance, and session components.
 
 ## Safety constraints
 - No NDVI, NDWI, raster, temporal, spatial, crop, or context-resolution calculations in the browser.
-- No invented production values or evidence; demo fixtures remain explicitly marked and never mix with real responses.
+- No fabricated scientific overlays or conclusions. Derived layers remain unavailable until the Python backend supplies them.
+- Draft ROI is always visually distinct from backend-validated ROI and never treated as authoritative.
+- Evidence and provenance are rendered only when supplied; export appears only when evidence JSON exists.
+- All domain statuses are first-class result states, not automatically frontend errors.
 - No provider credentials, environment details, filesystem paths, or direct NVIDIA/Nemotron calls in client code.
 - Only `cotton` appears as currently supported crop guidance.
 
 ## Verification
 - Check compilation through the project harness.
 - Exercise desktop and mobile layouts in the running preview.
-- Verify the demo query, ROI controls, evidence expansion/export, status rendering, session actions, delete confirmation, panel controls, and absence of browser console errors.
+- Verify the adapter is the only data-access path and real-backend failures never fall back to simulated scientific results.
+- Verify the demo query, draft/validated ROI controls, evidence availability rules, all domain statuses, session actions, delete confirmation, accessible mobile drawers, and absence of browser console errors.
 - Confirm the home page metadata is unique and SatQuery-specific.
