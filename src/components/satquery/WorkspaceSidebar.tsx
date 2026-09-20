@@ -7,11 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
-const layers: { id: LayerName; label: string; derived: boolean }[] = [
-  { id: "satellite", label: "Base map", derived: false }, { id: "rgb", label: "RGB", derived: true },
-  { id: "false-color", label: "False Color", derived: true }, { id: "ndvi", label: "NDVI", derived: true },
-  { id: "ndwi", label: "NDWI", derived: true }, { id: "temporal-change", label: "Temporal Change", derived: true },
-  { id: "analysis", label: "Analysis overlays", derived: true },
+const layers: { id: LayerName; label: string }[] = [
+  { id: "rgb", label: "RGB" }, { id: "false-color", label: "False Color" }, { id: "ndvi", label: "NDVI" },
+  { id: "ndwi", label: "NDWI" }, { id: "temporal-change", label: "Temporal Change" }, { id: "analysis", label: "Analysis Overlays" },
 ];
 
 interface SidebarProps {
@@ -63,9 +61,10 @@ export function WorkspaceSidebar(props: SidebarProps) {
           <label className="mt-2 grid gap-1 text-xs text-muted-foreground">After date<Input type="date" value={props.afterDate} onChange={(event) => props.onAfterDate(event.target.value)} className="h-8" /></label>
           <p className="mt-2 text-[10px] text-muted-foreground">Dates are never selected automatically.</p>
         </Section>
-        <Section title="Layer controls">
-          <div className="space-y-3">{layers.map((layer) => <label key={layer.id} className="flex items-center justify-between text-xs"><span className={layer.derived ? "text-muted-foreground" : "text-foreground"}>{layer.label}{layer.derived && <span className="ml-1 text-[9px]">UNAVAILABLE</span>}</span><Switch checked={!layer.derived && layer.id === "satellite"} disabled={layer.derived} /></label>)}</div>
-          <div className="mt-4"><div className="mb-2 flex justify-between text-[10px] uppercase text-muted-foreground"><span>Base opacity</span><span>{opacity[0]}%</span></div><Slider value={opacity} onValueChange={setOpacity} max={100} /></div>
+        <Section title="Analytical overlays">
+          <div className="space-y-3">{layers.map((layer) => <label key={layer.id} className="flex items-center justify-between text-xs"><span className="text-muted-foreground">{layer.label}</span><Switch checked={false} disabled /></label>)}</div>
+          <p className="mt-3 border border-dashed border-border p-2 text-[10px] leading-relaxed text-muted-foreground">Unavailable — backend analysis layer not connected</p>
+          <div className="mt-4"><div className="mb-2 flex justify-between text-[10px] uppercase text-muted-foreground"><span>Overlay opacity</span><span>{opacity[0]}%</span></div><Slider value={opacity} onValueChange={setOpacity} max={100} disabled /></div>
         </Section>
       </div>
     </aside>
