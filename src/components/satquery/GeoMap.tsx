@@ -1,16 +1,23 @@
 import { useEffect, useRef } from "react";
 import type { GeoJsonGeometry } from "@/api";
+import { BASEMAPS } from "@/map/basemaps";
+import type { GeocodingResult } from "@/map/geocoding";
+import { INITIAL_MAP_VIEW, SEARCH_FLY_ZOOM, type BasemapId, type ProjectionMode } from "@/map/mapConfig";
 
 interface GeoMapProps {
   draftROI: GeoJsonGeometry | null;
   validatedROI: GeoJsonGeometry | null;
   drawingMode: "polygon" | "rectangle" | null;
   onDraftChange: (geometry: GeoJsonGeometry | null) => void;
+  projection: ProjectionMode;
+  basemap: BasemapId;
+  selectedLocation: GeocodingResult | null;
 }
 
-export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange }: GeoMapProps) {
+export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, projection, basemap, selectedLocation }: GeoMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
+  const markerRef = useRef<import("maplibre-gl").Marker | null>(null);
   const pointsRef = useRef<number[][]>([]);
   const modeRef = useRef(drawingMode);
   const changeRef = useRef(onDraftChange);
@@ -27,22 +34,36 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange }: G
       maplibregl.setWorkerUrl("/maplibre-gl-csp-worker.js");
       const map = new maplibregl.Map({
         container: containerRef.current,
-        center: [78.9, 20.7],
-        zoom: 4.35,
+        center: INITIAL_MAP_VIEW.center,
+        zoom: INITIAL_MAP_VIEW.zoom,
+        bearing: INITIAL_MAP_VIEW.bearing,
+        pitch: INITIAL_MAP_VIEW.pitch,
         attributionControl: false,
         style: {
           version: 8,
           sources: {
-            osm: {
+            satellite: {
               type: "raster",
-              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-              tileSize: 256,
-              attribution: "© OpenStreetMap contributors",
+              tiles: BASEMAPS.satellite.tiles,
+              tileSize: BASEMAPS.satellite.tileSize,
+              maxzoom: BASEMAPS.satellite.maxzoom,
+              attribution: BASEMAPS.satellite.attribution,
+            },
+            streets: {
+              type: "raster",
+              tiles: BASEMAPS.streets.tiles,
+              tileSize: BASEMAPS.streets.tileSize,
+              maxzoom: BASEMAPS.streets.maxzoom,
+              attribution: BASEMAPS.streets.attribution,
             },
           },
-          layers: [{ id: "osm", type: "raster", source: "osm", paint: { "raster-saturation": -0.82, "raster-brightness-max": 0.57, "raster-contrast": 0.18 } }],
+          layers: [
+            { id: "satellite-basemap", type: "raster", source: "satellite", layout: { visibility: basemap === "satellite" ? "visible" : "none" } },
+            { id: "streets-basemap", type: "raster", source: "streets", layout: { visibility: basemap === "streets" ? "visible" : "none" } },
+          ],
         },
       });
+      map.setProjection({ type: projection === "globe" ? "globe" : "mercator" });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
       map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-left");
       map.on("load", () => {
@@ -76,8 +97,36 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange }: G
       mapRef.current = map;
     }
     setup();
-    return () => { active = false; mapRef.current?.remove(); mapRef.current = null; };
+    return () => { active = false; markerRef.current?.remove(); markerRef.current = null; mapRef.current?.remove(); mapRef.current = null; };
   }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.setProjection({ type: projection === "globe" ? "globe" : "mercator" });
+  }, [projection]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map?.isStyleLoaded()) return;
+    map.setLayoutProperty("satellite-basemap", "visibility", basemap === "satellite" ? "visible" : "none");
+    map.setLayoutProperty("streets-basemap", "visibility", basemap === "streets" ? "visible" : "none");
+  }, [basemap]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !selectedLocation) return;
+    markerRef.current?.remove();
+    const markerElement = document.createElement("div");
+    markerElement.className = "satquery-location-marker";
+    markerElement.setAttribute("aria-label", `Selected location: ${selectedLocation.label}`);
+    markerRef.current = new maplibreMarker(map, markerElement, selectedLocation.center);
+    if (selectedLocation.boundingBox) {
+      map.fitBounds([[selectedLocation.boundingBox[0], selectedLocation.boundingBox[1]], [selectedLocation.boundingBox[2], selectedLocation.boundingBox[3]]], { padding: 80, duration: 1400, maxZoom: SEARCH_FLY_ZOOM });
+    } else {
+      map.flyTo({ center: selectedLocation.center, zoom: Math.max(map.getZoom(), SEARCH_FLY_ZOOM), duration: 1400, essential: true });
+    }
+  }, [selectedLocation]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -93,4 +142,18 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange }: G
   }, [draftROI, validatedROI]);
 
   return <div className="absolute inset-0"><div ref={containerRef} className="h-full w-full" aria-label="Interactive geospatial map" /></div>;
+}
+
+function maplibreMarker(map: import("maplibre-gl").Map, element: HTMLElement, center: [number, number]) {
+  const Marker = map.constructor === undefined ? null : map;
+  void Marker;
+  const maplibregl = (map as unknown as { _controls?: unknown })._controls;
+  void maplibregl;
+  return new (requireMarker())({ element, anchor: "bottom" }).setLngLat(center).addTo(map);
+}
+
+let markerConstructor: typeof import("maplibre-gl").Marker | null = null;
+function requireMarker(): typeof import("maplibre-gl").Marker {
+  if (!markerConstructor) throw new Error("Map marker constructor is unavailable.");
+  return markerConstructor;
 }

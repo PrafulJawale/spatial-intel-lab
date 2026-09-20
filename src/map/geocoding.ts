@@ -43,7 +43,7 @@ export async function searchLocations(query: string, signal?: AbortSignal): Prom
   url.searchParams.set("limit", "6");
   let response: Response;
   try {
-    response = await fetch(url, { signal, headers: { Accept: "application/json" } });
+    response = await fetch(url, { ...(signal ? { signal } : {}), headers: { Accept: "application/json" } });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
     throw new GeocodingError("Location search is temporarily unavailable.", "network");
