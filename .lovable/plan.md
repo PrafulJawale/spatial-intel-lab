@@ -10,10 +10,15 @@ Upgrade only SatQuery’s map and nearby controls into a global Earth-observatio
 - Keep draft and validated ROI sources above either basemap and preserve all current drawing and validation behavior.
 
 ## Search and controls
-- Add a centralized, replaceable frontend geocoding service with debounced worldwide search and coordinate parsing.
+- Add a centralized, replaceable frontend geocoding service under `src/map` with debounced worldwide search and coordinate parsing.
 - Selecting a result flies the map to it and places a temporary navigation marker; it never creates an ROI or starts analysis.
 - Reorganize the map controls into a compact responsive toolbar: search, projection, basemap, then select/polygon/rectangle/edit/clear and Validate ROI.
 - Add a compact status strip for projection, basemap, ROI state, and backend mode.
+
+## Provider isolation and reliability
+- Add a small `src/map` configuration layer for basemap definitions, geocoding, and initial camera settings; components receive provider-neutral choices rather than embedding URLs or credentials.
+- Use legitimate visible-color satellite imagery and a separate worldwide streets source, with each provider’s required attribution always visible.
+- Use only browser-safe/public endpoints. Handle geocoder loading, empty, failure, and rate-limit states without private keys or hardcoded place lists.
 
 ## Layer clarity
 - Separate basemap controls from analytical-overlay controls in the sidebar.
@@ -21,4 +26,5 @@ Upgrade only SatQuery’s map and nearby controls into a global Earth-observatio
 
 ## Architecture and verification
 - Keep all changes frontend-only and do not add scientific calculations, generated overlays, evidence, or backend behavior.
-- Verify globe curvature, projection switching, both basemaps, search/fly-to/marker behavior, ROI drawing and validation, desktop/mobile layouts, attribution, and browser errors in the running preview.
+- Verify in the running browser: initial globe curvature, real projection switching without camera teleportation, both basemaps, attribution, worldwide and coordinate search, explicit selection/fly-to/marker behavior, no search-created ROI, polygon and rectangle drawing, draft/validated ROI layering and validation, unavailable analytical layers, desktop/mobile layouts and drawers, and zero console errors.
+- Report only checks actually exercised in the preview; confirm no scientific calculation or backend files/services were added.
