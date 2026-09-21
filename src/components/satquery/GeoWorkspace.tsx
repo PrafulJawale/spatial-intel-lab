@@ -44,7 +44,7 @@ export function GeoWorkspace(props: GeoWorkspaceProps) {
         <Button size="sm" className="shrink-0" disabled={!props.draftROI || props.roiPending} onClick={props.onSubmitROI}>{props.roiPending ? "Validating…" : "Validate ROI"}</Button>
       </div>
     </div>
-    <div className="absolute bottom-7 left-3 z-10 grid gap-1.5 border border-border bg-panel/95 p-3 text-[10px] shadow-xl">
+    <div className="absolute bottom-12 left-3 z-10 hidden gap-1.5 border border-border bg-panel/95 p-3 text-[10px] shadow-xl xl:grid">
       <span className="flex items-center gap-2 text-warning"><i className="w-5 border-t-2 border-dashed border-warning" />DRAFT ROI</span>
       <span className="flex items-center gap-2 text-success"><i className="w-5 border-t-2 border-success" />VALIDATED ROI</span>
       <span className="flex items-center gap-2 text-muted-foreground"><Layers className="size-3" />Derived layers unavailable</span>

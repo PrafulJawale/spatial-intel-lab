@@ -67,7 +67,7 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
       });
       map.setProjection({ type: projection === "globe" ? "globe" : "mercator" });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
-      map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-left");
+      map.addControl(new maplibregl.AttributionControl({ compact: false }), "bottom-left");
       map.on("load", () => {
         map.addSource("draft-roi", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
         map.addLayer({ id: "draft-fill", type: "fill", source: "draft-roi", paint: { "fill-color": "#f5b840", "fill-opacity": 0.17 } });
