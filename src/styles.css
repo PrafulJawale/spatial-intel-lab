@@ -172,8 +172,7 @@
   width: 18px;
   height: 18px;
   border: 3px solid var(--color-primary-foreground);
-  border-radius: 50% 50% 50% 0;
+  border-radius: 50%;
   background: var(--color-primary);
   box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-primary) 35%, transparent);
-  transform: rotate(-45deg);
 }

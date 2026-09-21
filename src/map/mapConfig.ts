@@ -3,7 +3,7 @@ export type BasemapId = "satellite" | "streets";
 
 export const INITIAL_MAP_VIEW = {
   center: [0, 20] as [number, number],
-  zoom: 0,
+  zoom: -1.1,
   bearing: 0,
   pitch: 0,
 };
