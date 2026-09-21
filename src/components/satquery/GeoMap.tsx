@@ -18,6 +18,7 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
   const markerRef = useRef<import("maplibre-gl").Marker | null>(null);
+  const markerClassRef = useRef<typeof import("maplibre-gl").Marker | null>(null);
   const pointsRef = useRef<number[][]>([]);
   const modeRef = useRef(drawingMode);
   const changeRef = useRef(onDraftChange);
@@ -31,6 +32,7 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
       if (!containerRef.current || mapRef.current) return;
       const maplibregl = await import("maplibre-gl");
       if (!active || !containerRef.current) return;
+      markerClassRef.current = maplibregl.Marker;
       maplibregl.setWorkerUrl("/maplibre-gl-csp-worker.js");
       const map = new maplibregl.Map({
         container: containerRef.current,
@@ -115,12 +117,13 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selectedLocation) return;
+    const Marker = markerClassRef.current;
+    if (!map || !Marker || !selectedLocation) return;
     markerRef.current?.remove();
     const markerElement = document.createElement("div");
     markerElement.className = "satquery-location-marker";
     markerElement.setAttribute("aria-label", `Selected location: ${selectedLocation.label}`);
-    markerRef.current = new maplibreMarker(map, markerElement, selectedLocation.center);
+    markerRef.current = new Marker({ element: markerElement, anchor: "bottom" }).setLngLat(selectedLocation.center).addTo(map);
     if (selectedLocation.boundingBox) {
       map.fitBounds([[selectedLocation.boundingBox[0], selectedLocation.boundingBox[1]], [selectedLocation.boundingBox[2], selectedLocation.boundingBox[3]]], { padding: 80, duration: 1400, maxZoom: SEARCH_FLY_ZOOM });
     } else {
@@ -142,18 +145,4 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
   }, [draftROI, validatedROI]);
 
   return <div className="absolute inset-0"><div ref={containerRef} className="h-full w-full" aria-label="Interactive geospatial map" /></div>;
-}
-
-function maplibreMarker(map: import("maplibre-gl").Map, element: HTMLElement, center: [number, number]) {
-  const Marker = map.constructor === undefined ? null : map;
-  void Marker;
-  const maplibregl = (map as unknown as { _controls?: unknown })._controls;
-  void maplibregl;
-  return new (requireMarker())({ element, anchor: "bottom" }).setLngLat(center).addTo(map);
-}
-
-let markerConstructor: typeof import("maplibre-gl").Marker | null = null;
-function requireMarker(): typeof import("maplibre-gl").Marker {
-  if (!markerConstructor) throw new Error("Map marker constructor is unavailable.");
-  return markerConstructor;
 }

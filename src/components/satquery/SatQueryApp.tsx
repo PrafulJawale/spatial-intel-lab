@@ -58,7 +58,7 @@ export function SatQueryApp() {
     </header>
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[280px_minmax(400px,1fr)_360px]">
       <div className="hidden min-h-0 border-r border-border lg:block"><WorkspaceSidebar {...sharedSidebarProps} /></div>
-      <GeoWorkspace draftROI={draftROI} validatedROI={validatedROI} drawingMode={drawingMode} onDrawingMode={setDrawingMode} onDraftChange={setDraftROI} onSubmitROI={() => draftROI && roiMutation.mutate(draftROI)} roiPending={roiMutation.isPending} />
+      <GeoWorkspace draftROI={draftROI} validatedROI={validatedROI} drawingMode={drawingMode} onDrawingMode={setDrawingMode} onDraftChange={setDraftROI} onSubmitROI={() => draftROI && roiMutation.mutate(draftROI)} roiPending={roiMutation.isPending} backendConnected={satQueryAdapter.status.connected} />
       <div className="hidden min-h-0 border-l border-border lg:block"><IntelligencePanel messages={messages} onSubmit={(query) => queryMutation.mutate(query)} pending={queryMutation.isPending} hasDraftROI={Boolean(draftROI)} hasValidatedROI={Boolean(validatedROI)} hasRaster={Boolean(rasterQuery.data?.available)} hasDates={Boolean(beforeDate && afterDate)} /></div>
     </div>
     <Sheet open={leftOpen} onOpenChange={setLeftOpen}><SheetContent side="left" className="w-[90vw] max-w-[320px] p-0"><SheetHeader className="sr-only"><SheetTitle>Workspace controls</SheetTitle><SheetDescription>Sessions, datasets, dates, and layers.</SheetDescription></SheetHeader><WorkspaceSidebar {...sharedSidebarProps} /></SheetContent></Sheet>
