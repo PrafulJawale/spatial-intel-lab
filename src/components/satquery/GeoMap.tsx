@@ -18,12 +18,17 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
   const markerRef = useRef<import("maplibre-gl").Marker | null>(null);
+  const markerClassRef = useRef<typeof import("maplibre-gl").Marker | null>(null);
   const pointsRef = useRef<number[][]>([]);
   const modeRef = useRef(drawingMode);
   const changeRef = useRef(onDraftChange);
+  const projectionRef = useRef(projection);
+  const basemapRef = useRef(basemap);
 
   useEffect(() => { modeRef.current = drawingMode; pointsRef.current = []; }, [drawingMode]);
   useEffect(() => { changeRef.current = onDraftChange; }, [onDraftChange]);
+  useEffect(() => { projectionRef.current = projection; }, [projection]);
+  useEffect(() => { basemapRef.current = basemap; }, [basemap]);
 
   useEffect(() => {
     let active = true;
@@ -31,11 +36,13 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
       if (!containerRef.current || mapRef.current) return;
       const maplibregl = await import("maplibre-gl");
       if (!active || !containerRef.current) return;
+      markerClassRef.current = maplibregl.Marker;
       maplibregl.setWorkerUrl("/maplibre-gl-csp-worker.js");
       const map = new maplibregl.Map({
         container: containerRef.current,
         center: INITIAL_MAP_VIEW.center,
         zoom: INITIAL_MAP_VIEW.zoom,
+        minZoom: -2,
         bearing: INITIAL_MAP_VIEW.bearing,
         pitch: INITIAL_MAP_VIEW.pitch,
         attributionControl: false,
@@ -63,10 +70,12 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
           ],
         },
       });
-      map.setProjection({ type: projection === "globe" ? "globe" : "mercator" });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
-      map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-left");
+      map.addControl(new maplibregl.AttributionControl({ compact: false }), "bottom-left");
       map.on("load", () => {
+        map.setProjection({ type: projectionRef.current === "globe" ? "globe" : "mercator" });
+        map.setLayoutProperty("satellite-basemap", "visibility", basemapRef.current === "satellite" ? "visible" : "none");
+        map.setLayoutProperty("streets-basemap", "visibility", basemapRef.current === "streets" ? "visible" : "none");
         map.addSource("draft-roi", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
         map.addLayer({ id: "draft-fill", type: "fill", source: "draft-roi", paint: { "fill-color": "#f5b840", "fill-opacity": 0.17 } });
         map.addLayer({ id: "draft-line", type: "line", source: "draft-roi", paint: { "line-color": "#f5b840", "line-width": 2, "line-dasharray": [2, 1.5] } });
@@ -103,29 +112,40 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    map.setProjection({ type: projection === "globe" ? "globe" : "mercator" });
+    const apply = () => map.setProjection({ type: projection === "globe" ? "globe" : "mercator" });
+    if (map.loaded()) apply(); else map.once("load", apply);
+    return () => { map.off("load", apply); };
   }, [projection]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map?.isStyleLoaded()) return;
-    map.setLayoutProperty("satellite-basemap", "visibility", basemap === "satellite" ? "visible" : "none");
-    map.setLayoutProperty("streets-basemap", "visibility", basemap === "streets" ? "visible" : "none");
+    if (!map) return;
+    const apply = () => {
+      if (map.getLayer("satellite-basemap")) map.setLayoutProperty("satellite-basemap", "visibility", basemap === "satellite" ? "visible" : "none");
+      if (map.getLayer("streets-basemap")) map.setLayoutProperty("streets-basemap", "visibility", basemap === "streets" ? "visible" : "none");
+    };
+    if (map.loaded()) apply(); else map.once("load", apply);
+    return () => { map.off("load", apply); };
   }, [basemap]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selectedLocation) return;
-    markerRef.current?.remove();
-    const markerElement = document.createElement("div");
-    markerElement.className = "satquery-location-marker";
-    markerElement.setAttribute("aria-label", `Selected location: ${selectedLocation.label}`);
-    markerRef.current = new maplibreMarker(map, markerElement, selectedLocation.center);
-    if (selectedLocation.boundingBox) {
-      map.fitBounds([[selectedLocation.boundingBox[0], selectedLocation.boundingBox[1]], [selectedLocation.boundingBox[2], selectedLocation.boundingBox[3]]], { padding: 80, duration: 1400, maxZoom: SEARCH_FLY_ZOOM });
-    } else {
-      map.flyTo({ center: selectedLocation.center, zoom: Math.max(map.getZoom(), SEARCH_FLY_ZOOM), duration: 1400, essential: true });
-    }
+    const Marker = markerClassRef.current;
+    if (!map || !Marker || !selectedLocation) return;
+    const apply = () => {
+      markerRef.current?.remove();
+      const markerElement = document.createElement("div");
+      markerElement.className = "satquery-location-marker";
+      markerElement.setAttribute("aria-label", `Selected location: ${selectedLocation.label}`);
+      markerRef.current = new Marker({ element: markerElement, anchor: "bottom" }).setLngLat(selectedLocation.center).addTo(map);
+      if (selectedLocation.boundingBox) {
+        map.fitBounds([[selectedLocation.boundingBox[0], selectedLocation.boundingBox[1]], [selectedLocation.boundingBox[2], selectedLocation.boundingBox[3]]], { padding: 80, duration: 1400, maxZoom: SEARCH_FLY_ZOOM });
+      } else {
+        map.flyTo({ center: selectedLocation.center, zoom: SEARCH_FLY_ZOOM, duration: 1400, essential: true });
+      }
+    };
+    if (map.loaded()) apply(); else map.once("load", apply);
+    return () => { map.off("load", apply); };
   }, [selectedLocation]);
 
   useEffect(() => {
@@ -142,18 +162,4 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
   }, [draftROI, validatedROI]);
 
   return <div className="absolute inset-0"><div ref={containerRef} className="h-full w-full" aria-label="Interactive geospatial map" /></div>;
-}
-
-function maplibreMarker(map: import("maplibre-gl").Map, element: HTMLElement, center: [number, number]) {
-  const Marker = map.constructor === undefined ? null : map;
-  void Marker;
-  const maplibregl = (map as unknown as { _controls?: unknown })._controls;
-  void maplibregl;
-  return new (requireMarker())({ element, anchor: "bottom" }).setLngLat(center).addTo(map);
-}
-
-let markerConstructor: typeof import("maplibre-gl").Marker | null = null;
-function requireMarker(): typeof import("maplibre-gl").Marker {
-  if (!markerConstructor) throw new Error("Map marker constructor is unavailable.");
-  return markerConstructor;
 }
