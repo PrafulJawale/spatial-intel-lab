@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { GeoJsonGeometry } from "@/api";
-import { BASEMAPS } from "@/map/basemaps";
+import { BASEMAPS, getBasemapZoomLimit } from "@/map/basemaps";
 import type { GeocodingResult } from "@/map/geocoding";
 import { INITIAL_MAP_VIEW, SEARCH_FLY_ZOOM, type BasemapId, type ProjectionMode } from "@/map/mapConfig";
 
@@ -43,6 +43,7 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
         center: INITIAL_MAP_VIEW.center,
         zoom: INITIAL_MAP_VIEW.zoom,
         minZoom: -2,
+        maxZoom: getBasemapZoomLimit(basemapRef.current),
         bearing: INITIAL_MAP_VIEW.bearing,
         pitch: INITIAL_MAP_VIEW.pitch,
         attributionControl: false,
@@ -121,6 +122,7 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
     const map = mapRef.current;
     if (!map) return;
     const apply = () => {
+      map.setMaxZoom(getBasemapZoomLimit(basemap));
       if (map.getLayer("satellite-basemap")) map.setLayoutProperty("satellite-basemap", "visibility", basemap === "satellite" ? "visible" : "none");
       if (map.getLayer("streets-basemap")) map.setLayoutProperty("streets-basemap", "visibility", basemap === "streets" ? "visible" : "none");
     };
