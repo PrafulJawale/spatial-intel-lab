@@ -27,3 +27,7 @@ export const BASEMAPS: Record<BasemapId, BasemapDefinition> = {
     attribution: "© OpenStreetMap contributors",
   },
 };
+
+export function getBasemapZoomLimit(basemap: BasemapId): number {
+  return BASEMAPS[basemap].maxzoom;
+}

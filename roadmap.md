@@ -5,3 +5,4 @@
 - [x] Build the responsive map-first workstation and backend-driven status UI.
 - [x] Verify desktop/mobile flows, accessibility, metadata, and runtime behavior.
 - [x] Upgrade the map to a true globe with isolated Satellite/Streets providers, global search, compact controls, and full browser acceptance verification.
+- [x] Cap map zoom to the selected basemap’s native tile range to avoid provider placeholder tiles.
