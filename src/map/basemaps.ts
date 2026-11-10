@@ -15,7 +15,7 @@ export const BASEMAPS: Record<BasemapId, BasemapDefinition> = {
     label: "Satellite",
     tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
     tileSize: 256,
-    maxzoom: 19,
+    maxzoom: 18,
     attribution: "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
   },
   streets: {
@@ -27,7 +27,3 @@ export const BASEMAPS: Record<BasemapId, BasemapDefinition> = {
     attribution: "© OpenStreetMap contributors",
   },
 };
-
-export function getBasemapZoomLimit(basemap: BasemapId): number {
-  return BASEMAPS[basemap].maxzoom;
-}

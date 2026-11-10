@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import type { GeoJsonGeometry } from "@/api";
-import { BASEMAPS, getBasemapZoomLimit } from "@/map/basemaps";
+import { BASEMAPS } from "@/map/basemaps";
 import type { GeocodingResult } from "@/map/geocoding";
-import { INITIAL_MAP_VIEW, SEARCH_FLY_ZOOM, type BasemapId, type ProjectionMode } from "@/map/mapConfig";
+import { INITIAL_MAP_VIEW, MAX_DISPLAY_ZOOM, SEARCH_FLY_ZOOM, type BasemapId, type ProjectionMode } from "@/map/mapConfig";
 
 interface GeoMapProps {
   draftROI: GeoJsonGeometry | null;
@@ -43,7 +43,7 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
         center: INITIAL_MAP_VIEW.center,
         zoom: INITIAL_MAP_VIEW.zoom,
         minZoom: -2,
-        maxZoom: getBasemapZoomLimit(basemapRef.current),
+        maxZoom: MAX_DISPLAY_ZOOM,
         bearing: INITIAL_MAP_VIEW.bearing,
         pitch: INITIAL_MAP_VIEW.pitch,
         attributionControl: false,
@@ -73,6 +73,7 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
       });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
       map.addControl(new maplibregl.AttributionControl({ compact: false }), "bottom-left");
+      map.addControl(new maplibregl.ScaleControl({ unit: "metric", maxWidth: 140 }), "bottom-left");
       map.on("load", () => {
         map.setProjection({ type: projectionRef.current === "globe" ? "globe" : "mercator" });
         map.setLayoutProperty("satellite-basemap", "visibility", basemapRef.current === "satellite" ? "visible" : "none");
@@ -122,7 +123,6 @@ export function GeoMap({ draftROI, validatedROI, drawingMode, onDraftChange, pro
     const map = mapRef.current;
     if (!map) return;
     const apply = () => {
-      map.setMaxZoom(getBasemapZoomLimit(basemap));
       if (map.getLayer("satellite-basemap")) map.setLayoutProperty("satellite-basemap", "visibility", basemap === "satellite" ? "visible" : "none");
       if (map.getLayer("streets-basemap")) map.setLayoutProperty("streets-basemap", "visibility", basemap === "streets" ? "visible" : "none");
     };
