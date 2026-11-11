@@ -49,7 +49,7 @@ export function GeoWorkspace(props: GeoWorkspaceProps) {
       <span className="flex items-center gap-2 text-success"><i className="w-5 border-t-2 border-success" />VALIDATED ROI</span>
       <span className="flex items-center gap-2 text-muted-foreground"><Layers className="size-3" />Derived layers unavailable</span>
     </div>
-    <div className="absolute bottom-2 right-2 z-10 flex max-w-[calc(100%-1rem)] flex-wrap items-center justify-end gap-x-3 gap-y-1 border border-border bg-panel/95 px-2.5 py-1.5 font-display text-[9px] uppercase text-muted-foreground shadow-xl backdrop-blur-sm sm:bottom-3 sm:right-3">
+    <div className="absolute bottom-2 right-12 z-10 flex max-w-[calc(100%-4rem)] flex-wrap items-center justify-end gap-x-3 gap-y-1 border border-border bg-panel/95 px-2.5 py-1.5 font-display text-[9px] uppercase text-muted-foreground shadow-xl backdrop-blur-sm sm:bottom-3 sm:right-12">
       <Status label="Projection" value={projection} /><Status label="Basemap" value={basemap} /><Status label="ROI" value={roiStatus} emphasize={roiStatus !== "NOT SELECTED"} /><Status label="Backend" value={props.backendConnected ? "CONNECTED" : "DEMO MODE"} />
     </div>
     {!props.draftROI && <div className="pointer-events-none absolute inset-x-0 bottom-20 z-10 mx-auto hidden w-fit border border-border bg-panel/90 px-4 py-2 text-xs text-muted-foreground shadow-xl sm:block">Search to navigate. Draw an ROI separately for analysis.</div>}

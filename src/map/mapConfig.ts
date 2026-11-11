@@ -8,6 +8,4 @@ export const INITIAL_MAP_VIEW = {
   pitch: 0,
 };
 
-export const MAX_DISPLAY_ZOOM = 22;
-
 export const SEARCH_FLY_ZOOM = 10;
