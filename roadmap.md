@@ -5,5 +5,5 @@
 - [x] Build the responsive map-first workstation and backend-driven status UI.
 - [x] Verify desktop/mobile flows, accessibility, metadata, and runtime behavior.
 - [x] Upgrade the map to a true globe with isolated Satellite/Streets providers, global search, compact controls, and full browser acceptance verification.
-- [ ] Improve real satellite imagery at close zoom without imposing an artificial zoom cap; keep the live distance scale clear of zoom controls.
+- [x] Allow close zoom without requesting satellite placeholder tiles: keep provider-native imagery through level 19, overzoom the real tiles after that, keep the live distance scale and zoom controls separated.
 - [ ] Update the frontend in the requested GitHub repository using an authorized, supported path.
